@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>QUOTES ✦ YFR</title>
+<style>
+  body {
+    margin: 0;
+    height: 100vh;
+    font-family: "Calibri", sans-serif;
+    background: #000;
+    color: #fff;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  canvas#lights {
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: -2;
+  }
+
+  h1 {
+    font-size: 68px;
+    text-align: center;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    font-weight: bold;
+    margin: 10px;
+    color: #fff;
+    text-shadow: 0 0 30px rgba(255,255,255,0.8);
+  }
+
+  button {
+    background: #000;
+    color: white;
+    border: 2px solid #fff;
+    padding: 14px 40px;
+    font-size: 64px;
+    border-radius: 50px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: 0.8s;
+    box-shadow: 0 0 15px rgba(255,255,255,0.3);
+  }
+
+  button:hover {
+    transform: scale(1.1);
+    box-shadow: 0 0 35px rgba(255,255,255,0.9);
+  }
+
+  .watermark {
+    position: fixed;
+    bottom: 15px;
+    right: 25px;
+    color: #fff;
+    font-size: 16px;
+    opacity: 0.4;
+    letter-spacing: 2px;
+    font-weight: 600;
+  }
+
+  @keyframes fadein {
+    0% { opacity: 0; transform: scale(0.95); }
+    100% { opacity: 1; transform: scale(1); }
+  }
+
+  .fade-in {
+    animation: fadein 5.5s ease-in-out forwards;
+  }
+</style>
+</head>
+<body>
+
+<canvas id="lights"></canvas>
+<button id="playBtn">▶️ Play</button>
+<h1 id="output"></h1>
+<div class="watermark">✦ Made by me Yfr ✦</div>
+<audio id="bgMusic" preload="auto" loop></audio>
+
+<script>
+// ===== LATAR LAMPU DISKO =====
+const canvas = document.getElementById("lights");
+const ctx = canvas.getContext("2d");
+let w, h;
+let lights = [];
+
+function initLights() {
+  w = canvas.width = window.innerWidth;
+  h = canvas.height = window.innerHeight;
+
+  // Lampu warna-warni besar
+  const colors = ["#ff0000", "#00ff00", "#0000ff", "#ffff00", "#ff00ff"];
+  lights = Array.from({ length: 8 }, () => ({
+    x: Math.random() * w,
+    y: Math.random() * h,
+    r: 150 + Math.random() * 200,
+    color: colors[Math.floor(Math.random() * colors.length)],
+    a: Math.random()
+  }));
+}
+
+function drawLights() {
+  ctx.clearRect(0, 0, w, h);
+  lights.forEach(l => {
+    ctx.beginPath();
+    const gradient = ctx.createRadialGradient(l.x, l.y, 0, l.x, l.y, l.r);
+    gradient.addColorStop(0, l.color + "90");
+    gradient.addColorStop(1, "transparent");
+    ctx.fillStyle = gradient;
+    ctx.globalAlpha = 0.5 + 0.5 * Math.sin(Date.now() / 500 + l.x);
+    ctx.arc(l.x, l.y, l.r, 0, Math.PI * 2);
+    ctx.fill();
+  });
+  requestAnimationFrame(drawLights);
+}
+window.addEventListener("resize", initLights);
+initLights();
+drawLights();
+
+// ====== AUDIO LATAR HOROR ======
+const bgMusic = document.getElementById("bgMusic");
+const horrorList = [
+  "https://cdn.pixabay.com/audio/2021/08/04/audio_3b2f9cfb22.mp3",
+  "https://cdn.pixabay.com/audio/2023/04/17/audio_6207e1e27a.mp3",
+  "https://cdn.pixabay.com/audio/2022/02/10/audio_d1a6dcf6ce.mp3"
+];
+bgMusic.src = horrorList[Math.floor(Math.random() * horrorList.length)];
+
+// ====== QUOTES & SUARA ======
+const quotes = [
+  { text: "Halo manusia serabutan...\nDaripada lo ngurusin hidup orang melulu, mendingan tobatdah...\nJangan sok pinter, kalo lo pintermah gak mungkin jadi serabutan 😈", delay: 9000 },
+  { text: "Kalo pinter mah improve🧠...\nBukannya nyinyir\nKalo tolol ya tolol aja, Gak usah sok kepinteran orang masih serabutan🤦‍♂️", delay: 9000 },
+  { text: "Kalau lu pinter gak mungkin jadi serabutan, ingat...\nGak ada orang pintar jadi serabutan, yang jadi serabutan itu orang tolol🖕", delay: 9000 }
+];
+
+// ====== ANIMASI TEKS & VOICE ======
+const button = document.getElementById("playBtn");
+const output = document.getElementById("output");
+
+function speakText(text) {
+  const utter = new SpeechSynthesisUtterance(text);
+  utter.lang = "id-ID";
+  utter.pitch = Math.random() * 0.8 + 0.6; // Random nada
+  utter.rate = Math.random() * 0.8 + 0.6;  // Random kecepatan
+  speechSynthesis.cancel();
+  speechSynthesis.speak(utter);
+}
+
+async function typeText(text) {
+  output.innerHTML = "";
+  output.classList.add("fade-in");
+  for (let i = 0; i < text.length; i++) {
+    output.innerHTML += text[i];
+    await new Promise(r => setTimeout(r, 5));
+  }
+}
+
+button.addEventListener("click", async () => {
+  button.style.display = "none";
+  bgMusic.volume = 0.8;
+
+  try {
+    await bgMusic.play();
+  } catch (e) {
+    console.warn("Autoplay blocked:", e);
+  }
+
+  for (let q of quotes) {
+    output.classList.remove("fade-in");
+    await typeText(q.text);
+    speakText(q.text);
+    await new Promise(r => setTimeout(r, q.delay));
+  }
+
+  // Selesai semua
+  setTimeout(() => {
+    button.style.display = "block";
+    output.innerHTML = "";
+  }, 2000);
+});
+</script>
+</body>
+</html>
